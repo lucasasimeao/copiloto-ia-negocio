@@ -22,7 +22,7 @@ Projeto acadêmico da graduação em IA e Automação Digital (UniFECAF), constr
 - **Cálculo de preço de impressão 3D** com ordem de cálculo definida no prompt (material, energia, manutenção, custo total e *markup*), incluindo um exemplo de referência.
 - **Fallback sem IA**: se a chave da API não estiver configurada ou a chamada falhar, o servidor responde por palavras-chave com o trecho certo da base, e o campo `source` indica a origem (`groq` ou `fallback`).
 - **API reutilizável**: `POST /api/chat` (usada pelo front-end) e `POST /api/ask`, aceitando `prompt` ou `message` no corpo.
-- **Teste automatizado** da rota com `node:test`.
+- **Testes automatizados** com `node:test`: fallback, validação de entrada, chamada ao LLM com cliente simulado (*mock*) e falha do LLM.
 
 ## Tecnologias
 
@@ -35,8 +35,8 @@ Projeto acadêmico da graduação em IA e Automação Digital (UniFECAF), constr
 ## Como executar
 
 ```bash
-git clone https://github.com/lucasasimeao/AssistenteIA.git
-cd AssistenteIA
+git clone https://github.com/lucasasimeao/copiloto-ia-negocio.git
+cd copiloto-ia-negocio
 npm install
 cp .env.example .env   # no Windows: copy .env.example .env
 ```
@@ -48,7 +48,7 @@ PORT=3000
 
 ```bash
 npm start      # http://localhost:3000
-npm test       # testa a resposta de fallback da rota
+npm test       # roda os testes (sem precisar de chave de API)
 ```
 
 Teste rápido da API:
@@ -68,9 +68,11 @@ Resposta: JSON com `reply` e `source` (`groq` com a chave configurada, `fallback
 ```text
 .
 ├── public/               # Interface do chat (index.html, style.css, app.js)
-├── src/server.js         # Servidor usado pelo npm start (Groq SDK + fallback)
-├── src/app.js            # Versão exportável do app, usada nos testes
-├── src/tests/            # Teste da rota /api/ask
+├── src/app.js            # App Express: rotas, chamada ao Groq e fallback (cliente LLM injetável)
+├── src/server.js         # Ponto de entrada (npm start)
+├── src/knowledge-base.js # Base de conhecimento do negócio (contato fictício)
+├── src/fallback.js       # Respostas por palavra-chave quando o LLM está indisponível
+├── src/tests/            # Testes das rotas e do fallback
 ├── .github/prompts/      # Prompts dos agentes back-end, front-end e orquestrador
 ├── SPEC.md               # Especificação do produto
 └── .env.example
@@ -82,11 +84,9 @@ Resposta: JSON com `reply` e `source` (`groq` com a chave configurada, `fallback
 - **Grounding e engenharia de prompt**: base de conhecimento injetada, regras de prioridade e instrução anti-alucinação.
 - **Resiliência**: fallback determinístico quando o serviço de IA está indisponível.
 - **Desenvolvimento orientado a especificação** com agentes de IA (spec → back-end → front-end → revisão do orquestrador).
-- **APIs REST e testes automatizados** em Node.js.
+- **APIs REST e testes automatizados** em Node.js, com injeção de dependência para simular o LLM.
 
 ## Próximos passos
 
-- Unificar `src/server.js` e `src/app.js` em um único app (hoje o teste cobre a versão de `app.js`).
-- Mover a base de conhecimento para um arquivo externo (JSON/Markdown) e evoluir para **RAG** com busca por similaridade.
-- Remover a dependência `@google/genai`, que não é usada.
+- Evoluir a base de conhecimento para **RAG** com busca por similaridade.
 - Adicionar prints da interface.

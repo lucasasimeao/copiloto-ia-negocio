@@ -1,8 +1,8 @@
 {
-  "name": "decolagem",
+  "name": "copiloto-ia-negocio",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Copiloto de IA (Groq) com base de conhecimento e fallback determinístico",
+  "main": "src/app.js",
   "scripts": {
     "start": "node src/server.js",
     "test": "node --test src/tests/chat-route.test.js"
@@ -12,9 +12,11 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@google/genai": "^2.15.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "groq-sdk": "^1.5.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
