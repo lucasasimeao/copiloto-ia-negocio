@@ -1,86 +1,92 @@
-# CM Copilot
+# Copiloto de IA para Pequeno Negócio
 
-Copiloto Corporativo Inteligente para a CM Arte & Presentes, criado para responder perguntas em linguagem natural sobre regras de negocio da loja, horarios operacionais e calculos de precificacao para impressao 3D. O sistema utiliza um backend com contexto empresarial injetado no prompt para fornecer respostas mais consistentes e alinhadas a operacao real.
+> Chat web com LLM que responde perguntas sobre a operação de uma loja (horários, procedimentos técnicos e cálculo de preço de impressão 3D) usando apenas uma base de conhecimento fornecida no prompt.
 
-## Tecnologias Utilizadas
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![Groq](https://img.shields.io/badge/LLM-Groq%20(Llama%203.1)-F55036)
+![Tests](https://img.shields.io/badge/tests-node%3Atest-informational)
 
-- JavaScript
-- HTML5
-- CSS3
-- Node.js
-- Express
-- API Groq (LLM)
-- Dotenv para configuracao de ambiente
+## Sobre o projeto
 
-## Ferramentas de IA no Desenvolvimento
+Em um pequeno negócio, as mesmas dúvidas se repetem: qual o horário de atendimento, qual a temperatura certa para sublimar uma caneca, como resolver falha de aderência na impressora 3D, quanto cobrar por uma peça. Essas respostas ficam na cabeça de uma ou duas pessoas.
 
-- IA generativa aplicada para apoiar a criacao da interface com proposta visual minimalista e foco em clareza.
-- GitHub Copilot utilizado no apoio a escrita e refino de codigo.
-- LLMs utilizadas na engenharia do System Prompt, com foco em grounding e restricao de respostas ao contexto corporativo.
+O **Copiloto** centraliza esse conhecimento em um assistente de chat. O back-end injeta uma **base de conhecimento do negócio** no *system prompt* e instrui o modelo a responder **somente** com base nela, dizendo explicitamente quando não tem a informação (técnica de *grounding* para reduzir alucinações).
 
-## Diferenciais do Projeto
+Projeto acadêmico da graduação em IA e Automação Digital (UniFECAF), construído a partir de uma especificação ([`SPEC.md`](SPEC.md)) e com prompts de agentes (back-end, front-end e orquestrador) em [`.github/prompts/`](.github/prompts/).
 
-- Injecao de contexto especifico da operacao da loja diretamente no System Prompt.
-- Regras fixas de negocio para horarios de trabalho, atendimento ao publico e procedimentos tecnicos.
-- Suporte a perguntas sobre precificacao de impressao 3D com parametros definidos e ordem de calculo obrigatoria.
-- Fallback inteligente quando a chave da API nao esta configurada, mantendo utilidade basica do sistema.
-- Endpoint de chat preparado para uso no frontend e para integracoes futuras.
+## Funcionalidades
 
-## Prints da Interface
+- **Chat estilo ChatGPT** em página única (balões do usuário e da IA).
+- **Respostas ancoradas** em uma base de conhecimento: regras de operação, especificações das máquinas e procedimentos técnicos.
+- **Cálculo de preço de impressão 3D** com ordem de cálculo definida no prompt (material, energia, manutenção, custo total e *markup*), incluindo um exemplo de referência.
+- **Fallback sem IA**: se a chave da API não estiver configurada ou a chamada falhar, o servidor responde por palavras-chave com o trecho certo da base, e o campo `source` indica a origem (`groq` ou `fallback`).
+- **API reutilizável**: `POST /api/chat` (usada pelo front-end) e `POST /api/ask`, aceitando `prompt` ou `message` no corpo.
+- **Teste automatizado** da rota com `node:test`.
 
-[Prints da Tela Aqui]
+## Tecnologias
 
-## Instalacao e Execucao
+- **Back-end:** Node.js, Express 5, dotenv
+- **IA:** Groq SDK com o modelo `llama-3.1-8b-instant`, `temperature: 0.2`
+- **Front-end:** HTML5, CSS3 e JavaScript puro
+- **Testes:** `node:test` + `assert`
+- **Desenvolvimento assistido por IA:** GitHub Copilot e prompts de agentes especializados
 
-### 1. Clonar o repositorio
+## Como executar
 
 ```bash
 git clone https://github.com/lucasasimeao/AssistenteIA.git
 cd AssistenteIA
-```
-
-### 2. Instalar dependencias
-
-```bash
 npm install
+cp .env.example .env   # no Windows: copy .env.example .env
 ```
-
-### 3. Configurar variaveis de ambiente
-
-Crie o arquivo .env na raiz do projeto com o seguinte conteudo:
 
 ```env
-GROQ_API_KEY=sua_chave_groq_aqui
+GROQ_API_KEY=sua_chave_groq
 PORT=3000
 ```
 
-### 4. Executar o projeto
-
 ```bash
-npm start
+npm start      # http://localhost:3000
+npm test       # testa a resposta de fallback da rota
 ```
 
-A aplicacao sera iniciada em:
-
-- http://localhost:3000
-
-### 5. Executar testes
-
-```bash
-npm test
-```
-
-### 6. Teste rapido da API
-
-Exemplo de requisicao para o endpoint de perguntas:
+Teste rápido da API:
 
 ```bash
 curl -X POST http://localhost:3000/api/ask \
   -H "Content-Type: application/json" \
-  -d '{"prompt":"qual o turno de trabalho?"}'
+  -d '{"prompt":"Qual o turno de trabalho?"}'
 ```
 
-Resposta esperada:
+Resposta: JSON com `reply` e `source` (`groq` com a chave configurada, `fallback` sem ela).
 
-- JSON com campo reply
-- source como groq (quando GROQ_API_KEY estiver configurada) ou fallback (quando nao estiver)
+> Sem `GROQ_API_KEY` o app continua funcionando no modo fallback, o que facilita testar.
+
+## Estrutura do projeto
+
+```text
+.
+├── public/               # Interface do chat (index.html, style.css, app.js)
+├── src/server.js         # Servidor usado pelo npm start (Groq SDK + fallback)
+├── src/app.js            # Versão exportável do app, usada nos testes
+├── src/tests/            # Teste da rota /api/ask
+├── .github/prompts/      # Prompts dos agentes back-end, front-end e orquestrador
+├── SPEC.md               # Especificação do produto
+└── .env.example
+```
+
+## Competências demonstradas
+
+- **Integração de LLM** via SDK com controle de temperatura e *system prompt*.
+- **Grounding e engenharia de prompt**: base de conhecimento injetada, regras de prioridade e instrução anti-alucinação.
+- **Resiliência**: fallback determinístico quando o serviço de IA está indisponível.
+- **Desenvolvimento orientado a especificação** com agentes de IA (spec → back-end → front-end → revisão do orquestrador).
+- **APIs REST e testes automatizados** em Node.js.
+
+## Próximos passos
+
+- Unificar `src/server.js` e `src/app.js` em um único app (hoje o teste cobre a versão de `app.js`).
+- Mover a base de conhecimento para um arquivo externo (JSON/Markdown) e evoluir para **RAG** com busca por similaridade.
+- Remover a dependência `@google/genai`, que não é usada.
+- Adicionar prints da interface.
